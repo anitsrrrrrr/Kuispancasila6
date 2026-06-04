@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Edukasi Pancasila</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+      color: #333;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* --- SIDEBAR LEFT (SETBAR) --- */
+    .sidebar {
+      width: 280px;
+      background-color: #1a1a2e;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      transition: all 0.3s ease;
+      overflow-y: auto;
+    }
+    .sidebar-brand {
+      padding: 24px 20px;
+      font-size: 1.3rem;
+      font-weight: bold;
+      background-color: #d32f2f;
+      text-align: center;
+      letter-spacing: 0.5px;
+    }
+    .sidebar-menu {
+      list-style: none;
+      padding: 15px 0;
+      flex-grow: 1;
+    }
+    .menu-item {
+      padding: 12px 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: background 0.2s, border-left 0.2s;
+      border-left: 4px solid transparent;
+      font-size: 0.95rem;
+      color: #b8b9ce;
+    }
+    .menu-item:hover {
+      background-color: #24243e;
+      color: #fff;
+    }
+    .menu-item.active {
+      background-color: #2a2a4a;
+      color: #fff;
+      border-left: 4px solid #d32f2f;
+      font-weight: 600;
+    }
+    
+    /* --- SUB-MENU PILIHAN KUIS DI SIDEBAR --- */
+    .submenu-kuis {
+      max-height: 0;
+      overflow: hidden;
+      list-style: none;
+      background-color: #111122;
+      transition: max-height 0.3s ease-out;
+      padding-left: 15px;
+    }
+    .submenu-kuis.open {
+      max-height: 200px; /* Memberikan ruang untuk item kuis */
+    }
+    .submenu-item {
+      padding: 10px 20px;
+      font-size: 0.9rem;
+      color: #a0a1b8;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      transition: color 0.2s, background 0.2s;
+      border-radius: 4px 0 0 4px;
+    }
+    .submenu-item:hover {
+      color: #fff;
+      background-color: #1d1d35;
+    }
+    .submenu-item.active-sub {
+      color: #fff;
+      background-color: #d32f2f;
+      font-weight: bold;
+    }
+    .arrow-icon {
+      font-size: 0.8rem;
+      transition: transform 0.3s;
+    }
+    .arrow-icon.rotate {
+      transform: rotate(90deg);
+    }
+
+    .sidebar-footer {
+      padding: 15px 20px;
+      font-size: 0.8rem;
+      color: #6c757d;
+      border-top: 1px solid #24243e;
+      text-align: center;
+    }
+
+    /* --- MAIN CONTENT RIGHT --- */
+    .main-container {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+    .topbar {
+      background-color: #fff;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      padding: 0 30px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+      border-bottom: 1px solid #eef2f5;
+    }
+    .topbar h2 {
+      font-size: 1.4rem;
+      color: #495057;
+    }
+    .content-body {
+      padding: 30px;
+      flex-grow: 1;
+      overflow-y: auto;
+    }
+
+    /* --- PANEL HALAMAN --- */
+    .page-panel {
+      display: none;
+      animation: fadeIn 0.4s ease;
+    }
+    .page-panel.active {
+      display: block;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card {
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      margin-bottom: 25px;
+      border: 1px solid #eef2f5;
+    }
+    .card h3 {
+      margin-bottom: 15px;
+      color: #1a1a2e;
+      font-size: 1.3rem;
+    }
+    .card p {
+      line-height: 1.7;
+      color: #626262;
+      margin-bottom: 15px;
+    }
+
+    /* --- CONTAINER FRAME KUIS --- */
+    .quiz-frame-container {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      overflow: hidden;
+      border: 1px solid #eef2f5;
+    }
+    iframe {
+      width: 100%;
+      height: 700px;
+      border: none;
+      display: block;
+    }
+
+    /* --- HALAMAN HASIL KUIS --- */
+    .result-box {
+      text-align: center;
+      padding: 40px 20px;
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid #eef2f5;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+    }
+    .result-placeholder {
+      color: #adb5bd;
+      font-style: italic;
+    }
+    .score-badge {
+      display: inline-block;
+      padding: 20px 40px;
+      background: #e8f5e9;
+      color: #2e7d32;
+      border-radius: 50px;
+      font-size: 2rem;
+      font-weight: bold;
+      margin: 20px 0;
+      border: 2px dashed #a5d6a7;
+    }
+
+    /* RESPONSIVE LAYOUT */
+    @media (max-width: 768px) {
+      body { flex-direction: column; }
+      .sidebar { width: 100%; height: auto; }
+      .submenu-kuis.open { max-height: 500px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SIDEBAR KIRI (SETBAR) -->
+  <div class="sidebar">
+    <div class="sidebar-brand">
+      Sistem Pancasila
+    </div>
+    <ul class="sidebar-menu">
+      <li class="menu-item active" onclick="bukaHalaman('beranda', this)">
+        <span>🏠 Beranda Utama</span>
+      </li>
+      
+      <li class="menu-item" onclick="bukaHalaman('materi', this)">
+        <span>📖 Materi Pembelajaran</span>
+      </li>
+      
+      <!-- MENU UTAMA KUIS (DENGAN DROPDOWN PILIHAN) -->
+      <li class="menu-item" id="menu-kuis-root" onclick="toggleDropdownKuis(this)">
+        <span>📝 Mulai Kuis Interaktif</span>
+        <span class="arrow-icon" id="arrow-kuis">▶</span>
+      </li>
+      <!-- DAFTAR KUIS PILIHAN DI DALAM SETBAR -->
+      <ul class="submenu-kuis" id="submenuKuis">
+        <li class="submenu-item" onclick="pilihKuis('pancasila-1', this)">📄 Kuis Pancasila Dasar</li>
+        <li class="submenu-item" onclick="pilihKuis('pancasila-2', this)">📄 Kuis Butir Pengamalan</li>
+        <li class="submenu-item" onclick="pilihKuis('pancasila-3', this)">📄 Kuis Sejarah BPUPKI</li>
+      </ul>
+
+      <li class="menu-item" id="menu-hasil" onclick="bukaHalaman('hasil', this)">
+        <span>📊 Hasil Evaluasi Kuis</span>
+      </li>
+    </ul>
+    <div class="sidebar-footer">
+      &copy; 2026 Admin Dashboard
+    </div>
+  </div>
+
+  <!-- AREA KONTEN UTAMA KANAN -->
+  <div class="main-container">
+    <div class="topbar">
+      <h2 id="page-title">Beranda Utama</h2>
+    </div>
+
+    <div class="content-body">
+      
+      <!-- Halaman 1: Beranda -->
+      <div id="page-beranda" class="page-panel active">
+        <div class="card">
+          <h3>Selamat Datang di Portal Edukasi</h3>
+          <p>Gunakan menu bar di sebelah kiri untuk mengakses fitur pembelajaran. Sekarang Anda dapat mengklik pilihan kuis yang tersedia langsung dari menu dropdown setbar.</p>
+        </div>
+      </div>
+
+      <!-- Halaman 2: Materi -->
+      <div id="page-materi" class="page-panel">
+        <div class="card">
+          <h3>Materi Utama Kebangsaan</h3>
+          <p>Pelajari nilai-nilai Pancasila sebelum menguji kemampuan Anda melalui pilihan kuis di sebelah kiri.</p>
+        </div>
+      </div>
+
+      <!-- Halaman 3: Tempat Kuis Dinamis -->
+      <div id="page-kuis" class="page-panel">
+        <div class="quiz-frame-container">
+          <!-- iFrame Utama yang URL-nya akan berganti tergantung kuis yang diklik pada setbar -->
+          <iframe id="quizFrame" src=""></iframe>
+        </div>
+      </div>
+
+      <!-- Halaman 4: Hasil Kuis -->
+      <div id="page-hasil" class="page-panel">
+        <div class="result-box" id="resultBox">
+          <div class="result-placeholder" id="placeholderText">
+            <p>Anda belum menyelesaikan kuis apa pun saat ini. Silakan kerjakan salah satu pilihan kuis di setbar untuk melihat lembar skor di sini.</p>
+          </div>
+          <div id="realResult" style="display: none;">
+            <h3>Selamat! Anda Telah Menyelesaikan Evaluasi</h3>
+            <div class="score-badge" id="displaySkor">0 / 0</div>
+            <p id="feedbackText">Nilai Anda berhasil direkam dari sistem pengerjaan kuis terbaru.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // URL Google Apps Script Kuis Anda
+    const URL_KUIS_PANCASILA = "https://script.google.com/macros/s/AKfycbzu5yquWJuLW34b3nTOZbBHcpFB03nTap-ErxdbrgMijuwSfWAR7gbOvhk4haWkUJzH/exec";
+
+    // 1. Fungsi Mengatur Dropdown Pilihan Kuis di Setbar
+    function toggleDropdownKuis(element) {
+      const submenu = document.getElementById('submenuKuis');
+      const arrow = document.getElementById('arrow-kuis');
+      
+      submenu.classList.toggle('open');
+      arrow.classList.toggle('rotate');
+      
+      // Jalankan fungsi reset menu aktif dasar
+      aktifkanMenuSaja(element);
+    }
+
+    // 2. Fungsi ketika salah satu Kuis Pilihan di Setbar diklik
+    function pilihKuis(jenisKuis, element) {
+      // Hilangkan status aktif dari pilihan kuis yang lain
+      const subItems = document.querySelectorAll('.submenu-item');
+      subItems.forEach(item => item.classList.remove('active-sub'));
+      
+      // Aktifkan item kuis yang sedang diklik
+      element.classList.add('active-sub');
+      
+      // Ambil elemen iframe kuis
+      const iframe = document.getElementById('quizFrame');
+      
+      // Atur URL iframe secara dinamis berdasarkan pilihan kuis di setbar
+      if (jenisKuis === 'pancasila-1') {
+        iframe.src = URL_KUIS_PANCASILA; // Mengarah ke kuis utama Anda
+        document.getElementById('page-title').innerText = "Kuis Pancasila Dasar";
+      } else if (jenisKuis === 'pancasila-2') {
+        iframe.src = URL_KUIS_PANCASILA + "?kategori=butir"; // Contoh modifikasi parameter
+        document.getElementById('page-title').innerText = "Kuis Butir Pengamalan";
+      } else if (jenisKuis === 'pancasila-3') {
+        iframe.src = URL_KUIS_PANCASILA + "?kategori=sejarah";
+        document.getElementById('page-title').innerText = "Kuis Sejarah BPUPKI";
+      }
+
+      // Tampilkan halaman kuis di bagian kanan
+      const panels = document.querySelectorAll('.page-panel');
+      panels.forEach(panel => panel.classList.remove('active'));
+      document.getElementById('page-kuis').classList.add('active');
+      
+      // Set status aktif pada root menu kuis di setbar
+      const menuItems = document.querySelectorAll('.menu-item');
+      menuItems.forEach(item => item.classList.remove('active'));
+      document.getElementById('menu-kuis-root').classList.add('active');
+    }
+
+    // 3. Fungsi Navigasi Menu Utama Lainnya
+    function bukaHalaman(pageId, element) {
+      // Tutup dropdown kuis jika menu utama lain diklik (opsional)
+      if (pageId !== 'kuis') {
+        document.getElementById('submenuKuis').classList.remove('open');
+        document.getElementById('arrow-kuis').classList.remove('rotate');
+        const subItems = document.querySelectorAll('.submenu-item');
+        subItems.forEach(item => item.classList.remove('active-sub'));
+      }
+
+      const panels = document.querySelectorAll('.page-panel');
+      panels.forEach(panel => panel.classList.remove('active'));
+      document.getElementById('page-' + pageId).classList.add('active');
+
+      aktifkanMenuSaja(element);
+
+      const titleMap = {
+        'beranda': 'Beranda Utama',
+        'materi': 'Materi Pembelajaran Pancasila',
+        'hasil': 'Hasil Evaluasi Kuis'
+      };
+      if (titleMap[pageId]) {
+        document.getElementById('page-title').innerText = titleMap[pageId];
+      }
+    }
+
+    function aktifkanMenuSaja(element) {
+      const menuItems = document.querySelectorAll('.menu-item');
+      menuItems.forEach(item => item.classList.remove('active'));
+      element.classList.add('active');
+    }
+
+    // 4. Sistem Penangkap Skor Otomatis dari Google Apps Script Kuis
+    window.addEventListener('message', function(event) {
+      if (event.data && event.data.type === 'QUIZ_SUBMITTED') {
+        const skor = event.data.skor;
+        const total = event.data.total;
+        
+        document.getElementById('placeholderText').style.display = 'none';
+        document.getElementById('realResult').style.display = 'block';
+        document.getElementById('displaySkor').innerText = skor + " / " + total;
+        
+        // Beri efek kilatan warna hijau di menu hasil setbar tanda skor masuk
+        const menuHasil = document.getElementById('menu-hasil');
+        menuHasil.style.backgroundColor = '#2e7d32';
+        menuHasil.style.color = '#ffffff';
+        setTimeout(() => {
+          menuHasil.style.backgroundColor = '';
+          menuHasil.style.color = '';
+        }, 2000);
+      }
+    });
+  </script>
+</body>
+</html>
